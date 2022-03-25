@@ -32,8 +32,18 @@
 
 changelog: https://github.com/emissary-ingress/emissary/blob/$branch$/CHANGELOG.md
 items:
-  - version: 2.2.2
+  - version: 2.3.0
     date: 'TBD'
+    notes:
+      - title: CORS now happens before auth
+        type: bugfix
+        body: >-
+          When CORS is specified (either in a <code>Mapping</code> or in the <code>Ambassador</code>
+          <code>Module</code>), CORS processing will happen before authentication. This corrects a
+          problem where XHR to authenticated endpoints would fail.
+
+  - version: 2.2.2
+    date: '2022-02-25'
     notes:
       - title: TLS Secret validation is now opt-in
         type: change
