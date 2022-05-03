@@ -365,6 +365,7 @@ func (sh *SnapshotHolder) K8sUpdate(
 	consulWatcher *consulWatcher,
 	fastpathProcessor FastpathProcessor,
 ) (bool, error) {
+	dlog.Infof(ctx, "[K8sUpdate]: Begin k8sUpdate")
 	dbg := debug.FromContext(ctx)
 
 	katesUpdateTimer := dbg.Timer("katesUpdate")
@@ -393,6 +394,7 @@ func (sh *SnapshotHolder) K8sUpdate(
 		})
 
 		if !changed || err != nil {
+			dlog.Infof(ctx, "[K8sUpdate]: No change detected by FilteredUpdate()")
 			return false, err
 		}
 
@@ -433,18 +435,21 @@ func (sh *SnapshotHolder) K8sUpdate(
 			err = ReconcileSecrets(ctx, sh)
 		})
 		if err != nil {
+			dlog.Errorf(ctx, "[K8sUpdate]: ERROR Reconciling Secrets")
 			return false, err
 		}
 		reconcileConsulTimer.Time(func() {
 			err = ReconcileConsul(ctx, consulWatcher, sh.k8sSnapshot)
 		})
 		if err != nil {
+			dlog.Errorf(ctx, "[K8sUpdate]: ERROR Reconciling Consul")
 			return false, err
 		}
 		reconcileAuthServicesTimer.Time(func() {
 			err = ReconcileAuthServices(ctx, sh, &deltas)
 		})
 		if err != nil {
+			dlog.Errorf(ctx, "[K8sUpdate]: ERROR reconciling AuthServices: %v", err)
 			return false, err
 		}
 
@@ -503,10 +508,11 @@ func (sh *SnapshotHolder) K8sUpdate(
 			}
 			_, dispSnapshot = sh.dispatcher.GetSnapshot(ctx)
 		}
-
+		dlog.Infof(ctx, "[K8sUpdate]: Change check completed")
 		return true, nil
 	}()
 	if err != nil {
+		dlog.Errorf(ctx, "[K8sUpdate]: ERROR checking changes")
 		return changed, err
 	}
 
@@ -517,7 +523,7 @@ func (sh *SnapshotHolder) K8sUpdate(
 		}
 		fastpathProcessor(ctx, fastpath)
 	}
-
+	dlog.Infof(ctx, "[K8sUpdate]: End K8sUpdate")
 	return changed, nil
 }
 
